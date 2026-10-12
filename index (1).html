@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=0">
+<meta name="theme-color" content="#000000">
+<title>Revision Universe | Offline Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000; --surface: #0a0a0c; --surface-elevated: #121214;
+  --border: rgba(255,255,255,0.08); --glass: rgba(255,255,255,0.03);
+  --text: #ffffff; --muted: #8b8b93;
+  --primary: #00e599; --primary-dim: rgba(0,229,153,0.15);
+  --accent: #0066ff; --accent-dim: rgba(0,102,255,0.15);
+  --danger: #ff3366; --danger-dim: rgba(255,51,102,0.15);
+  --warning: #ffcc00;
+  --radius: 28px; --radius-sm: 16px;
+  --font: 'Plus Jakarta Sans', sans-serif; --mono: 'JetBrains Mono', monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+body { font-family: var(--font); color: var(--text); background: var(--bg); overflow-x: hidden; padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle at 15% 50%, rgba(0,229,153,0.08), transparent 40%), radial-gradient(circle at 85% 20%, rgba(0,102,255,0.08), transparent 40%);
+  animation: breathe 10s ease-in-out infinite alternate; }
+@keyframes breathe { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+#di { position: fixed; top: max(15px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%) scale(0.8); background: #121214; color: #fff; padding: 8px 16px; border-radius: 40px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.5s; border: 1px solid var(--border); }
+#di.show { transform: translateX(-50%) scale(1); opacity: 1; }
+#ii { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
+#di.success #ii { background: var(--primary); }
+#di.error #ii { background: var(--danger); }
+
+.wrap { max-width: 540px; margin: 0 auto; padding: 0 20px; }
+.header { padding: max(30px, env(safe-area-inset-top)) 0 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+.header h1 { font-size: 32px; font-weight: 800; background: linear-gradient(to right, #fff, #8b8b93); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { color: var(--primary); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; position: relative; overflow: hidden; }
+.ch { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.ch h2 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+.tc { width: 100%; overflow-x: auto; background: var(--surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border); scrollbar-width: none; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; }
+th { color: var(--muted); font-size: 11px; text-transform: uppercase; font-weight: 700; background: rgba(0,0,0,0.2); }
+
+.ring { position: relative; width: min(280px, 100%); margin: 20px auto 40px; filter: drop-shadow(0 0 30px rgba(0,229,153,0.15)); }
+.ring svg { width: 100%; height: auto; display: block; transform: rotate(-90deg); }
+.track { fill: none; stroke: var(--surface-elevated); stroke-width: 8; }
+.arc { fill: none; stroke: var(--primary); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 816; stroke-dashoffset: 816; transition: stroke-dashoffset 0.5s linear; }
+.ro { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.clock { font-size: clamp(52px, 17vw, 72px); font-weight: 800; font-family: var(--mono); line-height: 1; }
+.cs { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-top: 12px; }
+
+input, select, textarea { width: 100%; padding: 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 14px; margin-bottom: 16px; transition: 0.3s; appearance: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--primary); background-color: #000; }
+select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.fr { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom:12px; }
+.btn { white-space: nowrap; width: 100%; padding: 16px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 800; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; color:var(--text); transition: transform 0.2s; }
+.btn:active { transform: scale(0.95); }
+.bm { background: var(--text); color: var(--bg); }
+.bp { background: var(--primary); color: #000; }
+.ba { background: var(--accent); color: #fff; }
+.bd { background: var(--surface-elevated); border: 1px solid var(--border); }
+
+.tg { display: flex; background: rgba(0,0,0,0.3); padding: 6px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid var(--border); }
+.tb { flex: 1; text-align: center; padding: 12px; border-radius: 12px; color: var(--muted); font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.3s; }
+.tb.active { background: var(--surface-elevated); color: var(--text); }
+.tb.active[data-val=Easy] { background: var(--primary); color: #000; }
+.tb.active[data-val=Medium] { background: var(--warning); color: #000; }
+.tb.active[data-val=Hard] { background: var(--danger); color: #000; }
+
+.view { display: none; animation: slideUp 0.4s ease forwards; }
+.view.active { display: block; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
+
+nav { width: max-content; max-width: calc(100vw - 16px); position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: rgba(10,10,12,0.95); backdrop-filter: blur(20px); border: 1px solid var(--border); padding: 6px; border-radius: 40px; display: flex; gap: 4px; z-index: 100; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+.ni { white-space: nowrap; padding: 12px 16px; border-radius: 30px; color: var(--muted); font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
+.ni.active { background: var(--text); color: var(--bg); }
+
+.db-section { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 10px; }
+.db-section:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.lbl { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+.chap-row { display: grid; grid-template-columns: 1fr 84px 44px; gap: 8px; align-items: start; }
+.chap-row input { margin-bottom: 8px; }
+.chap-row button { padding: 0; height: 51px; }
+.bdel { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,51,102,0.3); }
+.hint { font-size: 12px; color: var(--muted); margin: -8px 0 16px; line-height: 1.5; }
+#cf { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 24px; }
+#cf .box { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 380px; }
+#cf p { font-size: 15px; line-height: 1.6; margin-bottom: 20px; font-weight: 600; }
+.acc-h { cursor: pointer; margin-bottom: 0 !important; user-select: none; -webkit-user-select: none; }
+.card.open .acc-h { margin-bottom: 20px !important; }
+.chev { display: flex; color: var(--muted); transition: transform 0.3s, color 0.3s; }
+.card.open .chev { transform: rotate(180deg); color: var(--primary); }
+.acc-b { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
+.card.open .acc-b { grid-template-rows: 1fr; }
+.acc-i { overflow: hidden; min-height: 0; }
+.btn.sm { width: auto; padding: 10px 14px; font-size: 13px; border-radius: 12px; }
+.selbar { display: none; position: sticky; top: max(8px, env(safe-area-inset-top)); z-index: 60; align-items: center; gap: 8px; padding: 10px 12px; margin-bottom: 14px; background: rgba(18,18,20,0.96); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 20px; }
+.selbar.on { display: flex; }
+.selbar .cnt { flex: 1; font-weight: 800; font-size: 14px; }
+.dis { opacity: 0.4; }
+#tblLocalLogs tr { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.ckc { display: none; }
+.sel-mode .ckc { display: table-cell; }
+.ckb { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--muted); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #000; vertical-align: middle; }
+tr.sel { background: var(--primary-dim); }
+tr.sel .ckb { background: var(--primary); border-color: var(--primary); }
+tr.sel .ckb::after { content: "✓"; }
+tr.detail td { white-space: normal; color: var(--muted); font-size: 13px; line-height: 1.6; background: rgba(0,0,0,0.25); }
+.hhint { font-size: 12px; color: var(--muted); padding: 0 20px 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div id="di"><div id="ii"></div><span id="it">Done</span></div>
+
+<div class="wrap">
+<div class="header"><div><p>🟢 100% Offline Mode</p><h1>Universe</h1></div></div>
+
+<!-- STUDY FLOW VIEW -->
+<main id="view-study" class="view active">
+ <div class="card" id="selectorCard">
+  <div class="tg">
+    <div class="tb active" id="modeRev" onclick="setMode('revision')">Revision</div>
+    <div class="tb" id="modeNew" onclick="setMode('first_study')">First Study</div>
+  </div>
+  
+  <select id="mSub" onchange="populateChapters('mSub', 'mChap', 'mLec')">
+    <option value="">Subject चुनें...</option>
+  </select>
+  <select id="mChap" onchange="populateLectures('mSub', 'mChap', 'mLec')" disabled>
+    <option value="">पहले Subject चुनें...</option>
+  </select>
+  <select id="mLec" disabled>
+    <option value="">पहले Chapter चुनें...</option>
+  </select>
+ </div>
+
+ <div class="card timer-card">
+  <div class="ring">
+    <svg viewBox="0 0 280 280"><circle class="track" cx="140" cy="140" r="130"/><circle class="arc" id="arc" cx="140" cy="140" r="130"/></svg>
+    <div class="ro">
+      <div class="clock" id="clock">00:00</div>
+      <div class="cs" id="clockState">Ready</div>
+    </div>
+  </div>
+  <div class="fr">
+    <button class="btn bm" id="startBtn" onclick="toggleTimer()"><i class="lni lni-play"></i> Start Flow</button>
+    <button class="btn bd" onclick="stopTimer()"><i class="lni lni-stop"></i> End</button>
+  </div>
+  <div style="text-align:center; margin-top:10px;">
+    <span style="font-size:13px; color:var(--muted); cursor:pointer; font-weight:600;" onclick="showManualTime()"><i class="lni lni-pencil"></i> Manual Entry</span>
+  </div>
+  <div id="manualTimeDiv" style="display:none; margin-top:16px;">
+    <input type="number" id="manualTime" placeholder="Manual time (minutes)" min="1" max="1440" style="margin-bottom:0;">
+  </div>
+ </div>
+
+ <div class="card" id="saveCard" style="display:none; border-color:rgba(0,229,153,0.3);">
+  <div class="ch" style="margin-bottom:0;">
+    <h2><i class="lni lni-save"></i> Log Session</h2>
+    <span id="finalTimeTxt" style="font-weight:800; color:var(--primary); font-family:var(--mono); font-size:18px;"></span>
+  </div>
+  <div class="tg" style="margin-top: 16px;">
+    <div class="tb diff-btn" data-val="Easy" onclick="setDiff('Easy')">Easy</div>
+    <div class="tb diff-btn active" data-val="Medium" onclick="setDiff('Medium')">Medium</div>
+    <div class="tb diff-btn" data-val="Hard" onclick="setDiff('Hard')">Hard</div>
+  </div>
+  <textarea id="notes" placeholder="Insights / Solutions / Tricks..." rows="3" style="resize:none;"></textarea>
+  <button class="btn bp" onclick="saveSession()" style="margin-bottom:0;"><i class="lni lni-save"></i> Save Locally</button>
+ </div>
+</main>
+
+<!-- DATABASE MANAGER VIEW -->
+<main id="view-database" class="view">
+ <div class="tg">
+   <div class="tb active" id="dbTabNew" onclick="setDbTab('new')">नया जोड़ें</div>
+   <div class="tb" id="dbTabEx" onclick="setDbTab('ex')">मौजूदा में जोड़ें</div>
+ </div>
+
+ <!-- TAB 1: बिल्कुल नया Subject (सब type करके) -->
+ <div id="dbPaneNew">
+  <div class="card">
+   <div class="ch"><h2><i class="lni lni-database"></i> नया Subject बनाएँ</h2></div>
+   <span class="lbl">Subject का नाम</span>
+   <input type="text" id="nSub" placeholder="E.g. Hindi, English...">
+   <span class="lbl">Chapters (नाम + कितने Lectures)</span>
+   <div id="nChapRows"></div>
+   <button class="btn bd" onclick="addChapRow()" style="margin-bottom:12px;">+ और Chapter</button>
+   <button class="btn bp" onclick="saveNewSubject()" style="margin-bottom:0;"><i class="lni lni-save"></i> Save Subject</button>
+  </div>
+ </div>
+
+ <!-- TAB 2: मौजूदा में जोड़ना + हटाना -->
+ <div id="dbPaneEx" style="display:none;">
+  <div class="card">
+   <div class="ch"><h2><i class="lni lni-plus"></i> जोड़ें</h2></div>
+   <span class="lbl">Subject</span>
+   <select id="aSub" onchange="onASub()"></select>
+   <input type="text" id="aSubNew" placeholder="नए Subject का नाम" style="display:none;">
+   <span class="lbl">Chapter</span>
+   <select id="aChap" onchange="onAChap()" disabled></select>
+   <input type="text" id="aChapNew" placeholder="नए Chapter का नाम" style="display:none;">
+   <span class="lbl">Lectures</span>
+   <div class="fr">
+     <input type="number" id="aCount" placeholder="कितने नए" min="1" max="200">
+     <input type="text" id="aLecName" placeholder="या नाम type करें">
+   </div>
+   <p class="hint">संख्या डालने पर Lectures अपने आप आगे की गिनती से बनेंगे (जैसे Lec 6, Lec 7...)। नाम type करेंगे तो सिर्फ वही 1 Lecture जुड़ेगा।</p>
+   <button class="btn ba" onclick="addToExisting()" style="margin-bottom:0;"><i class="lni lni-plus"></i> Add</button>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,51,102,0.25);">
+   <div class="ch"><h2><i class="lni lni-trash-can"></i> हटाएँ (Delete)</h2></div>
+   <select id="dSub" onchange="populateChapters('dSub', 'dChap', 'dLec')"><option value="">Subject चुनें...</option></select>
+   <select id="dChap" onchange="populateLectures('dSub', 'dChap', 'dLec')" disabled><option value="">पहले Subject चुनें...</option></select>
+   <select id="dLec" disabled><option value="">पहले Chapter चुनें...</option></select>
+   <button class="btn bdel" onclick="delSubject()" style="margin-bottom:12px;">① पूरा Subject हटाएँ</button>
+   <button class="btn bdel" onclick="delChapter()" style="margin-bottom:12px;">② सिर्फ Chapter हटाएँ</button>
+   <button class="btn bdel" onclick="delLecture()" style="margin-bottom:0;">③ सिर्फ Lecture हटाएँ</button>
+   <p class="hint" style="margin:14px 0 0;">यहाँ से सिर्फ Subject / Chapter / Lecture की list से हटता है। Local History tab के records सुरक्षित रहते हैं।</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(0,229,153,0.3);">
+   <div class="ch"><h2><i class="lni lni-reload"></i> वापस लाएँ (Restore)</h2></div>
+   <p class="hint" style="margin-top:0;">गलती से हटा हुआ मूल डेटा यहाँ से वापस आ जाएगा। जो आपने खुद जोड़ा है वह वैसा ही रहेगा।</p>
+   <select id="rSub"></select>
+   <button class="btn bp" onclick="restoreSub()" style="margin-bottom:0;"><i class="lni lni-reload"></i> वापस लाएँ</button>
+  </div>
+ </div>
+</main>
+
+<!-- HISTORY VIEW -->
+<main id="view-history" class="view">
+ <div class="selbar" id="histBar">
+   <span class="cnt" id="selCount">0 चुने</span>
+   <button class="btn bd sm" onclick="selectAllHist()">सब चुनें</button>
+   <button class="btn bdel sm" id="selDelBtn" onclick="deleteSelected()">हटाएँ</button>
+   <button class="btn bd sm" onclick="exitSel()">✕</button>
+ </div>
+ <div class="card" id="histCard" style="padding: 16px 0;">
+   <div class="ch" style="padding: 0 20px;">
+     <h2>Local History</h2>
+     <button class="btn bd sm" onclick="downloadCSV()"><i class="lni lni-download"></i> CSV</button>
+   </div>
+   <p class="hhint" id="histHint" style="display:none;">Row दबाएँ: Notes देखें। Row को देर तक दबाएँ: चुनें और हटाएँ।</p>
+   <div class="tc">
+     <table>
+       <thead><tr><th class="ckc"></th><th>Date</th><th>Subject</th><th>Chapter</th><th>Lecture</th><th>Time</th><th>Diff</th><th>Notes</th></tr></thead>
+       <tbody id="tblLocalLogs"><tr><td colspan="7" style="text-align:center;">No history found.</td></tr></tbody>
+     </table>
+   </div>
+ </div>
+</main>
+</div>
+
+<!-- CONFIRM POPUP -->
+<div id="cf"><div class="box"><p id="cfMsg"></p>
+  <div class="fr" style="margin-bottom:0;">
+    <button class="btn bd" onclick="cfAnswer(false)">रद्द करें</button>
+    <button class="btn bdel" onclick="cfAnswer(true)">हाँ, हटाएँ</button>
+  </div></div></div>
+
+<!-- BOTTOM NAV -->
+<nav>
+ <div class="ni active" data-tab="study" onclick="go('study')"><i class="lni lni-timer"></i> Flow</div>
+ <div class="ni" data-tab="history" onclick="go('history')"><i class="lni lni-book"></i> History</div>
+ <div class="ni" data-tab="database" onclick="go('database')"><i class="lni lni-cog"></i> Tools</div>
+</nav>
+
+<script>
+// --- CORE CONSTANTS & DEFAULT DATA ---
+const HISTORY_KEY = 'ru_local_history';
+const DB_KEY = 'ru_local_database';
+const RADIUS = 816;
+
+const gen = (n) => Array.from({length: n}, (_, i) => "Lec " + (i + 1));
+
+const defaultData = {
+  "Maths- (Arithmetic)": {"Ratio & Proportion":gen(17),"Percentage":gen(18),"Mixture & Alligation":gen(9),"Profit & Loss":gen(13),"Simple Interest":gen(7),"Compound Interest":gen(11),"Chain Rule":gen(4),"Time & Work":gen(8),"Pipe & Cistern":gen(5),"Average":gen(9),"Age":gen(7),"Partnership":gen(5),"Time Speed & Distance":gen(10),"Train":gen(3),"Boat and Stream":gen(4),"Calculation":gen(10),"Digital Sum":gen(3)},
+  "Maths- (Advance)": {"Geometry (ज्यामिति)":gen(27),"Algebra":gen(21),"Algebra Recorded":gen(13),"Trigonometry":gen(19),"Trigonometry Recorded":gen(12),"Height & Distance":gen(5),"Permutation, Combination & Probability":gen(8),"Quadratic Equation":gen(5),"Coordination Geometry":gen(8),"Polynomial":gen(1),"Number System":gen(21),"Statistics":gen(5),"Simplification":gen(7),"LCM & HCF":gen(8),"Surds & Indices":gen(10),"Data Interpretation":gen(11),"Mensuration":gen(29)},
+  "Maths": {"Ratio & Proportion":gen(16),"Percentage":gen(14),"Mixture & Alligation":gen(6),"Profit & Loss":gen(9),"Simple Interest":gen(6),"Compound Interest":gen(10),"Time & Work":gen(10),"Pipe & Cistern":gen(6),"Average":gen(5),"Race":gen(2),"Age":gen(6),"Partnership":gen(2),"Train":gen(4),"Boat and Stream":gen(4),"Time Speed & Distance":gen(7),"Number System":gen(11),"LCM & HCF":gen(4),"Surds & Indices":gen(3),"Algebra":gen(5),"Trigonometry":gen(7),"Geometry (ज्यामिति)":gen(11),"Mensuration":gen(12),"Coordination Geometry":gen(4),"Statistics":gen(6),"Permutation, Combination":gen(2),"Probability":gen(2),"Data Interpretation":gen(5)},
+  "Reasoning": {"Venn Diagram":gen(2),"Dice":gen(3),"Mirror & Water Image":gen(1),"Mathematical Operations":gen(2),"Alphabet":gen(4),"Letter Series":gen(1),"Coding Decoding":gen(4),"Analogy":gen(2),"Classification":gen(1),"Number Series":gen(2),"Seating Arrangement":gen(3),"Puzzle":gen(1),"Inequality":gen(2),"Non-verbal Analogy & Classification":gen(1),"Non Verbal Series":gen(1),"Syllogism":gen(3),"Blood Relation":gen(3),"Calendar":gen(4),"Clock":gen(2),"Distance & Direction":gen(2),"Counting Of Figure":gen(2),"Missing Number":gen(1),"Ranking & Ordering":gen(2),"Statement & Argument":gen(1),"Paper Cutting, Figure Formation & Passage":gen(1),"Cube & Cuboid, Cause & Effect":gen(1),"Completion Of Figures":gen(1)},
+  "Physics": {"दाब":gen(3),"प्रकाश":gen(14),"गति":gen(5),"न्यूटन के गति के नियम":gen(6),"कार्य, ऊर्जा और शक्ति":gen(6),"गुरुत्वाकर्षण":gen(5),"ध्वनि और तरंग":gen(7),"ऊष्मा":gen(9),"विद्युत":gen(4),"चुम्बकत्व":gen(2),"Unit & Dimension":gen(2),"पदार्थ":gen(3),"घर्षण":gen(1),"SHM":gen(1)},
+  "Chemistry": {"पदार्थ":gen(2),"परमाणु":gen(10),"अम्ल और क्षार":gen(5),"PH Scale":gen(4),"आवर्त सारणी":gen(9),"रासायनिक बंध/आबंध":gen(9),"Periodic Table (MCQ)":gen(1),"गैसीय अवस्था":gen(2),"विलयन और कोलाइड":gen(5),"ईंधन":gen(2),"हाइड्रोजन":gen(2),"धातु व अधातु":gen(5),"Organic Compound":gen(3),"विद्युत-रसायन":gen(2),"दैनिक जीवन में रसायन":gen(4),"Important Facts":gen(2)},
+  "Biology": {"कोशिका":gen(9),"पाचन तंत्र":gen(8),"उत्सर्जन तंत्र":gen(3),"रक्त":gen(5),"परिसंचरण तंत्र":gen(6),"श्र्वसन तंत्र":gen(3),"कंकाल तंत्र":gen(5),"तंत्रिका तंत्र":gen(5),"अंतस्रावी तंत्र":gen(5),"प्रजनन तंत्र":gen(4),"मानव स्वास्थ्य और रोग":gen(8),"ऊतक":gen(4),"Plant Morphology & Phychology":gen(5),"मानव नेत्र":gen(1),"Classification":gen(10)},
+  "Static GK": {"कला से संबंधित महत्वपूर्ण तथ्य":gen(1),"भारत के संगठन":gen(1),"भारत में राष्ट्रीय उद्यान":gen(1),"शास्त्रीय नृत्य":gen(2),"महत्वपूर्ण दिवस एवं थीम":gen(2),"भारत और विश्व में प्रथम":gen(1),"खेल से संबंधित महत्वपूर्ण तथ्य":gen(4),"कला एवं संस्कृति":gen(1),"भारत की लोक भाषा":gen(1),"GI Tag":gen(1),"भारत में प्रथम पुरुष एवं महिला":gen(1),"भारत की नदी घाटी परियोजनाएं":gen(1),"भारत के प्रमुख त्यौहार एवं उत्सव":gen(1),"ओलंपिक खेल":gen(2),"देश राजधानी और मुद्रा":gen(1),"अनुसंधान संथान":gen(2),"भारत के राष्ट्रीय उद्यान एवं अभयारण्य":gen(4),"Paralympic 2024":gen(1),"भारत की पंचवर्षीय योजनाएँ":gen(2),"भारत रत्न पुरस्कार":gen(1),"अंतर्राष्ट्रीय संगठन":gen(2),"विश्व विरासत स्थल":gen(1),"राष्ट्रीय संगठन":gen(1),"भारत के प्रमुख संगीत घराने":gen(1),"प्रमुख संग्रहालय एवं समाधी स्थल":gen(1),"भारत के प्रमुख दर्रे":gen(1),"भारत एवं विश्व की प्रमुख झीले, जलप्रपात एवं नहरे":gen(2),"भारत एवं विश्व की प्रमुख नदिया":gen(1),"महत्वपूर्ण अनुच्छेद":gen(1)},
+  "Physical Geography": {"Universe (ब्रह्माण्ड)":gen(2),"तारों का जीवन चक्र":gen(1),"सौरमंडल":gen(2),"क्षुद्रग्रह, धुमकेतु, उपग्रह":gen(3),"ज्वार-भाटा":gen(1),"पृथ्वी":gen(1),"वायुमंडल":gen(2),"पर्वत, पठार एवं मैदान":gen(3),"ज्वालामुखी":gen(1),"ज्वालामुखी और भूकंप":gen(2),"ऋतु परिवर्तन":gen(1),"दाब और पवनें":gen(3)},
+  "World Geography": {"दक्षिण अमेरिका":gen(2),"उत्तरी अमेरिका":gen(3),"यूरोप महाद्वीप":gen(2),"अफ्रीका महाद्वीप":gen(2),"ऑस्ट्रेलिया महाद्वीप":gen(2),"एशिया महाद्वीप":gen(1)},
+  "Indian Geography": {"भारत का सामान्य परिचय":gen(6),"Island (द्वीप)":gen(2),"पठार और पर्वत":gen(7),"अपवाह तंत्र":gen(9),"झीलें":gen(1),"Forest (वन)":gen(6),"परिवहन":gen(5),"खनिज संसाधन":gen(3),"Soil (मिट्टी)":gen(3),"कृषि":gen(4),"जनजाति":gen(2)},
+  "Polity": {"Doubt And Talk Session":gen(1),"Practice Session":gen(3),"Test":gen(3),"संविधान सभा":gen(5),"भारतीय संविधान के स्रोत":gen(1),"अनुसूचियाँ":gen(2),"भाग-1":gen(2),"भाग-2":gen(3),"भाग-3":gen(7),"भाग-4":gen(2),"मौलिक कर्तव्य":gen(1),"भारत के राष्ट्रपति":gen(5),"उपराष्ट्रपति":gen(1),"प्रधानमंत्री":gen(1),"संसद":gen(5),"सुप्रीम कोर्ट":gen(1),"Comptroller and Auditor General of India":gen(1),"राज्यपाल":gen(1),"विधानमण्डल":gen(1),"उच्च न्यायालय":gen(2),"मुख्यमंत्री":gen(1),"भाग-8,9":gen(1),"भाग-9,10":gen(1),"भाग-11, भाग-12, भाग-13":gen(1),"भाग-14,15,16":gen(1),"भाग-16,17,18,19":gen(1),"भाग-20,21,22":gen(1),"Commission":gen(1),"प्रस्तावना":gen(1),"भारत का संवैधानिक विकास":gen(4)},
+  "Economics": {"Doubt Session":gen(1),"Test":gen(4),"Structure Of RBI":gen(4),"Monetary Policy(मौद्रिक नीति)":gen(3),"Cheque":gen(3),"Money Market":gen(4),"Capital Market":gen(2),"Stock Market":gen(1),"योजनाएं (Scheme)":gen(3),"Budget (बजट)":gen(4),"Census":gen(3),"Five Year Plans(पंचवर्षीय योजनाएं)":gen(4),"International Organization":gen(3),"Inflation And Deflation":gen(1),"Basel Norms":gen(2),"National Income (राष्ट्रीय आय)":gen(1)},
+  "History": {"Test":gen(1),"सिंधु घाटी सभ्यता":gen(3),"वैदिक सभ्यता":gen(3),"जैन धर्म":gen(2),"बौद्ध धर्म":gen(2),"मगध साम्राज्य":gen(2),"मौर्य साम्राज्य":gen(3),"मौर्योत्तर काल":gen(1),"गुप्त वंश":gen(3),"इस्लाम धर्म":gen(1),"अरब आक्रमण":gen(1),"तुर्की आक्रमण":gen(4),"गुलाम वंश":gen(5),"खिलजी वंश":gen(6),"तुगलक वंश (Tughlaq Dynasty)":gen(1),"सैय्यद और लोदी वंश":gen(2),"मुगल साम्राज्य":gen(15),"मराठा साम्राज्य":gen(2),"यूरोपीय कंपनियों का आगमन":gen(4),"प्लासी और बक्सर का युद्ध":gen(3),"सामाजिक सुधारक":gen(4),"1857 की क्रांति":gen(3),"कांग्रेस की स्थापना":gen(2),"बंगाल विभाजन":gen(2),"क्रांतिकारी आंदोलन":gen(3),"गांधी युग":gen(3),"भारत छोड़ो आंदोलन":gen(2),"Test(Class)":gen(3)},
+  "Computer": {"Introduction And Syllabus":gen(1),"Basic Of Computer":gen(2),"Internet":gen(7),"Operating System":gen(3),"MS Word":gen(7),"Software":gen(2),"History Of Computer":gen(4),"Input Device":gen(3),"Types Of Computer":gen(2),"MS Excel":gen(3),"Networking":gen(5),"MS Power Point":gen(2),"Cyber Security":gen(4),"Data Representation":gen(2),"Generation Of Computer":gen(1),"Output Device":gen(2),"Memory":gen(3),"Programming Language":gen(2),"Computer Architecture":gen(2),"Mobile Communication":gen(1),"Database Management System":gen(3)},
+  "Environment": {"Introduction And Syllabus":gen(1),"Extra Notes":gen(4),"MCQ":gen(4),"पारिस्थितिकी तंत्र":gen(2),"पारिस्थितिक पिरामिड तथा पोषण स्तर":gen(1),"जैव-भू-रासायनिक चक्र (Biogeochemical Cycle)":gen(2),"प्रदूषण":gen(5),"जैव विविधता (Biodiversity)":gen(3),"Climate Change ( जलवायु परिवर्तन)":gen(1)},
+  "Current Affairs": {"Current Affairs":gen(71)},
+  "Special Class": {"Mixture And Alligation":gen(1)},
+  "Talk Session": {"Talk Session":gen(1),"Special Talk Session By Aditya Sir":gen(6)},
+  "SMP": {"Special Class":gen(6),"Result PDF":gen(3)},
+  "ebook": {"Current Affairs eMagazine":gen(1),"Static GK Sanjivani Book":gen(1)}
+};
+
+let masterData = {};
+let state = { mode: 'revision', diff: 'Medium', run: false, elapsed: 0, start: 0 };
+let tick = null; let islandTimer = null;
+
+function g(id) { return document.getElementById(id); }
+function jget(k, d) { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : d; } catch(e) { return d; } }
+function jset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+function showIsland(msg, type='success') {
+  const i = g('di'); g('it').textContent = msg;
+  i.className = type + ' show';
+  clearTimeout(islandTimer); islandTimer = setTimeout(() => i.className = '', 3000);
+}
+
+const VER_KEY = 'ru_data_ver';
+const DATA_VER = '2';
+
+function cloneDef(s) { return JSON.parse(JSON.stringify(defaultData[s])); }
+function mergeDefaults(saved) {
+  Object.keys(defaultData).forEach(s => {
+    if (!saved[s]) { saved[s] = cloneDef(s); return; }
+    Object.keys(defaultData[s]).forEach(c => {
+      if (!saved[s][c]) { saved[s][c] = defaultData[s][c].slice(); return; }
+      defaultData[s][c].forEach(l => { if (!saved[s][c].includes(l)) saved[s][c].push(l); });
+    });
+  });
+  return saved;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  let savedDB = jget(DB_KEY, null);
+  if (!savedDB || Object.keys(savedDB).length === 0) {
+    savedDB = JSON.parse(JSON.stringify(defaultData));
+  } else {
+    let ver = null; try { ver = localStorage.getItem(VER_KEY); } catch(e) {}
+    if (ver !== DATA_VER) savedDB = mergeDefaults(savedDB);
+  }
+  jset(DB_KEY, savedDB);
+  try { localStorage.setItem(VER_KEY, DATA_VER); } catch(e) {}
+  masterData = savedDB;
+  refreshAllSubjectDropdowns();
+  initAcc();
+  initHistEvents();
+  addChapRow();
+});
+
+function refreshAllSubjectDropdowns() {
+  const subs = Object.keys(masterData).sort();
+  ['mSub', 'dSub'].forEach(id => {
+    const sel = g(id);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Subject चुनें...</option>';
+    subs.forEach(s => sel.add(new Option(s, s)));
+  });
+  const a = g('aSub');
+  if (a) {
+    a.innerHTML = '<option value="">Subject चुनें...</option>';
+    subs.forEach(s => a.add(new Option(s, s)));
+    a.add(new Option('➕ नया type करें', '__new__'));
+  }
+  fillRestore();
+  if (g('mChap')) { g('mChap').innerHTML = '<option value="">पहले Subject चुनें...</option>'; g('mChap').disabled = true; }
+  if (g('mLec')) { g('mLec').innerHTML = '<option value="">पहले Chapter चुनें...</option>'; g('mLec').disabled = true; }
+  if (g('dChap')) { g('dChap').innerHTML = '<option value="">पहले Subject चुनें...</option>'; g('dChap').disabled = true; }
+  if (g('dLec')) { g('dLec').innerHTML = '<option value="">पहले Chapter चुनें...</option>'; g('dLec').disabled = true; }
+  if (g('aChap')) { g('aChap').innerHTML = '<option value="">पहले Subject चुनें...</option>'; g('aChap').disabled = true; }
+  if (g('aSubNew')) g('aSubNew').style.display = 'none';
+  if (g('aChapNew')) g('aChapNew').style.display = 'none';
+}
+
+function populateChapters(subId, chapId, lecId = null) {
+  const sub = g(subId).value;
+  const chapSel = g(chapId);
+  chapSel.innerHTML = '<option value="">Chapter चुनें...</option>';
+  if(lecId) { g(lecId).innerHTML = '<option value="">Lecture चुनें...</option>'; g(lecId).disabled = true; }
+  
+  if (sub && masterData[sub]) {
+    chapSel.disabled = false;
+    Object.keys(masterData[sub]).forEach(c => chapSel.add(new Option(c, c)));
+  } else {
+    chapSel.disabled = true;
+  }
+}
+
+function populateLectures(subId, chapId, lecId) {
+  const sub = g(subId).value; const chap = g(chapId).value; const lecSel = g(lecId);
+  lecSel.innerHTML = '<option value="">Lecture चुनें...</option>';
+  
+  if (sub && chap && masterData[sub][chap]) {
+    lecSel.disabled = false;
+    masterData[sub][chap].forEach(l => lecSel.add(new Option(l, l)));
+  } else {
+    lecSel.disabled = true;
+  }
+}
+
+function saveDB() { jset(DB_KEY, masterData); refreshAllSubjectDropdowns(); }
+
+function setDbTab(k) {
+  g('dbTabNew').classList.toggle('active', k === 'new');
+  g('dbTabEx').classList.toggle('active', k === 'ex');
+  g('dbPaneNew').style.display = k === 'new' ? 'block' : 'none';
+  g('dbPaneEx').style.display = k === 'ex' ? 'block' : 'none';
+}
+
+function nextLecNum(arr) {
+  let mx = 0;
+  arr.forEach(l => { const m = /^Lec (d+)$/.exec(l); if (m) mx = Math.max(mx, parseInt(m[1], 10)); });
+  return mx + 1;
+}
+
+function addChapRow() {
+  const d = document.createElement('div'); d.className = 'chap-row';
+  d.innerHTML = '<input type="text" class="cn" placeholder="Chapter का नाम"><input type="number" class="cc" placeholder="Lecs" min="1" max="200"><button class="btn bd" onclick="this.parentNode.remove()">✕</button>';
+  const container = g('nChapRows');
+  if (container) container.appendChild(d);
+}
+
+function saveNewSubject() {
+  const name = g('nSub').value.trim();
+  if (!name) return showIsland('Subject का नाम लिखें', 'error');
+  if (masterData[name]) return showIsland('यह Subject पहले से है (दूसरा tab इस्तेमाल करें)', 'error');
+  const obj = {};
+  const rows = document.querySelectorAll('#nChapRows .chap-row');
+  for (const r of rows) {
+    const cn = r.querySelector('.cn').value.trim(); const cv = r.querySelector('.cc').value.trim();
+    if (!cn && !cv) continue;
+    if (!cn) return showIsland('Chapter का नाम छूटा है', 'error');
+    const n = parseInt(cv, 10);
+    if (isNaN(n) || n < 1 || n > 200) return showIsland('"' + cn + '" के Lectures (1-200) डालें', 'error');
+    if (obj[cn]) return showIsland('"' + cn + '" दो बार है', 'error');
+    obj[cn] = gen(n);
+  }
+  if (!Object.keys(obj).length) return showIsland('कम से कम 1 Chapter जोड़ें', 'error');
+  masterData[name] = obj; saveDB();
+  g('nSub').value = ''; g('nChapRows').innerHTML = ''; addChapRow();
+  showIsland('Subject Added!');
+}
+
+function onASub() {
+  const v = g('aSub').value; const cs = g('aChap');
+  g('aSubNew').style.display = v === '__new__' ? 'block' : 'none';
+  cs.innerHTML = '<option value="">Chapter चुनें...</option>';
+  if (v && v !== '__new__' && masterData[v]) Object.keys(masterData[v]).forEach(c => cs.add(new Option(c, c)));
+  if (v) { cs.add(new Option('➕ नया type करें', '__new__')); cs.disabled = false; } else { cs.disabled = true; }
+  if (v === '__new__') cs.value = '__new__';
+  onAChap();
+}
+function onAChap() { g('aChapNew').style.display = g('aChap').value === '__new__' ? 'block' : 'none'; }
+
+function addToExisting() {
+  const sv = g('aSub').value, cv = g('aChap').value;
+  const sub = sv === '__new__' ? g('aSubNew').value.trim() : sv;
+  const chap = cv === '__new__' ? g('aChapNew').value.trim() : cv;
+  if (!sub) return showIsland('Subject चुनें / नाम लिखें', 'error');
+  if (!chap) return showIsland('Chapter चुनें / नाम लिखें', 'error');
+  const nm = g('aLecName').value.trim(); const cnt = parseInt(g('aCount').value, 10) || 0;
+  if (!nm && cnt < 1) return showIsland('Lectures की संख्या या नाम डालें', 'error');
+  if (cnt > 200) return showIsland('एक बार में अधिकतम 200', 'error');
+  const arr = (masterData[sub] && masterData[sub][chap]) ? masterData[sub][chap] : [];
+  if (nm && arr.includes(nm)) return showIsland('यह Lecture पहले से है', 'error');
+  if (!masterData[sub]) masterData[sub] = {};
+  if (!masterData[sub][chap]) masterData[sub][chap] = arr;
+  if (nm) { arr.push(nm); }
+  else { const n = nextLecNum(arr); for (let i = 0; i < cnt; i++) arr.push('Lec ' + (n + i)); }
+  saveDB();
+  g('aSub').value = sub; onASub(); g('aChap').value = chap; onAChap();
+  g('aCount').value = ''; g('aLecName').value = ''; g('aSubNew').value = ''; g('aChapNew').value = '';
+  showIsland(nm ? 'Lecture Added!' : cnt + ' Lectures Added!');
+}
+
+function reselectDel(sub, chap) {
+  if (!masterData[sub]) return;
+  g('dSub').value = sub; populateChapters('dSub', 'dChap', 'dLec');
+  if (chap && masterData[sub][chap]) { g('dChap').value = chap; populateLectures('dSub', 'dChap', 'dLec'); }
+}
+let cfYes = null;
+function askConfirm(msg, yes) { g('cfMsg').textContent = msg; cfYes = yes; g('cf').style.display = 'flex'; }
+function cfAnswer(ok) { g('cf').style.display = 'none'; const f = cfYes; cfYes = null; if (ok && f) f(); }
+
+function delLecture() {
+  const s = g('dSub').value, c = g('dChap').value, l = g('dLec').value;
+  if (!s || !c || !l) return showIsland('Subject, Chapter, Lecture चुनें', 'error');
+  askConfirm('"' + s + ' → ' + c + ' → ' + l + '" हटाएँ?', () => {
+    masterData[s][c] = masterData[s][c].filter(x => x !== l);
+    saveDB(); reselectDel(s, c); showIsland('Lecture हटा दिया');
+  });
+}
+function delChapter() {
+  const s = g('dSub').value, c = g('dChap').value;
+  if (!s || !c) return showIsland('Subject और Chapter चुनें', 'error');
+  askConfirm('"' + s + ' → ' + c + '" और उसके ' + masterData[s][c].length + ' Lectures हटाएँ?', () => {
+    delete masterData[s][c]; saveDB(); reselectDel(s, ''); showIsland('Chapter हटा दिया');
+  });
+}
+function delSubject() {
+  const s = g('dSub').value;
+  if (!s) return showIsland('Subject चुनें', 'error');
+  askConfirm('"' + s + '" और उसके ' + Object.keys(masterData[s]).length + ' Chapters हटाएँ?', () => {
+    delete masterData[s]; saveDB(); showIsland('Subject हटा दिया');
+  });
+}
+
+function missingSubjects() {
+  return Object.keys(defaultData).filter(s => {
+    if (!masterData[s]) return true;
+    return Object.keys(defaultData[s]).some(c => !masterData[s][c] || defaultData[s][c].some(l => !masterData[s][c].includes(l)));
+  });
+}
+function fillRestore() {
+  const r = g('rSub');
+  if (!r) return;
+  const m = missingSubjects();
+  if (!m.length) { r.innerHTML = '<option value="">कुछ भी हटा हुआ नहीं है ✔</option>'; return; }
+  r.innerHTML = '<option value="">वापस लाने के लिए Subject चुनें...</option>';
+  m.forEach(s => r.add(new Option(s, s)));
+  if (m.length > 1) r.add(new Option('— सब वापस लाएँ —', '__all__'));
+}
+function restoreSub() {
+  const v = g('rSub').value;
+  if (!v) return showIsland('Subject चुनें', 'error');
+  const list = v === '__all__' ? missingSubjects() : [v];
+  list.forEach(s => {
+    if (!masterData[s]) { masterData[s] = cloneDef(s); return; }
+    Object.keys(defaultData[s]).forEach(c => {
+      if (!masterData[s][c]) { masterData[s][c] = defaultData[s][c].slice(); return; }
+      defaultData[s][c].forEach(l => { if (!masterData[s][c].includes(l)) masterData[s][c].push(l); });
+      if (masterData[s][c].every(l => /^Lec \d+$/.test(l))) masterData[s][c].sort((a, b) => parseInt(a.slice(4), 10) - parseInt(b.slice(4), 10));
+    });
+  });
+  saveDB(); showIsland(v === '__all__' ? 'सब वापस आ गया' : 'वापस आ गया: ' + v);
+}
+
+function initAcc() {
+  const chev = '<span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>';
+  document.querySelectorAll('#view-database .card').forEach(card => {
+    const h = card.querySelector('.ch'); if (!h) return;
+    const b = document.createElement('div'); b.className = 'acc-b';
+    const i = document.createElement('div'); i.className = 'acc-i';
+    while (h.nextSibling) i.appendChild(h.nextSibling);
+    b.appendChild(i); card.appendChild(b);
+    h.classList.add('acc-h'); h.insertAdjacentHTML('beforeend', chev);
+    h.addEventListener('click', () => toggleAcc(card));
+  });
+}
+function toggleAcc(card) {
+  const was = card.classList.contains('open');
+  card.parentElement.querySelectorAll('.card.open').forEach(c => c.classList.remove('open'));
+  if (!was) card.classList.add('open');
+}
+
+function go(tab) {
+  document.querySelectorAll('.ni').forEach(n => n.classList.toggle('active', n.getAttribute('data-tab') === tab));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const targetView = g('view-' + tab);
+  if (targetView) targetView.classList.add('active');
+  if (tab !== 'history') { selMode = false; selIds.clear(); openId = null; }
+  if(tab === 'history') renderHistory();
+  window.scrollTo(0, 0);
+}
+function setMode(m) { state.mode = m; g('modeRev').classList.toggle('active', m === 'revision'); g('modeNew').classList.toggle('active', m !== 'revision'); }
+function setDiff(v) { state.diff = v; document.querySelectorAll('.diff-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-val') === v)); }
+function showManualTime() { g('manualTimeDiv').style.display = 'block'; }
+
+function totalT() { return state.run ? state.elapsed + Math.floor((Date.now() - state.start) / 1000) : state.elapsed; }
+function p2(n) { return String(n).padStart(2, '0'); }
+function paintT() {
+  const s = totalT(); g('clock').textContent = p2(Math.floor(s / 60)) + ':' + p2(s % 60);
+  g('arc').style.strokeDashoffset = String(RADIUS * (1 - (s % 3600) / 3600));
+}
+
+function toggleTimer() {
+  const sb = g('startBtn');
+  if (state.run) {
+    state.elapsed = totalT(); state.run = false; clearInterval(tick);
+    sb.innerHTML = '<i class="lni lni-play"></i> Resume'; g('clockState').textContent = 'Paused'; sb.className = 'btn bm';
+  } else {
+    state.run = true; state.start = Date.now(); clearInterval(tick); tick = setInterval(paintT, 500);
+    g('saveCard').style.display = 'none'; sb.innerHTML = '<i class="lni lni-pause"></i> Pause'; g('clockState').textContent = 'Deep Work'; sb.className = 'btn bd';
+  } paintT();
+}
+
+function stopTimer() {
+  if (state.run) toggleTimer();
+  const v = g('manualTime').value.trim(); const man = !v ? 0 : parseInt(v, 10);
+  if (isNaN(man) || man < 0) return showIsland('Invalid minutes', 'error');
+  if (man === 0 && state.elapsed < 60) return showIsland('Timer too short', 'error');
+  g('finalTimeTxt').textContent = (man > 0 ? man : Math.max(1, Math.round(state.elapsed / 60))) + ' Min';
+  g('saveCard').style.display = 'block'; g('saveCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function saveSession() {
+  const sub = g('mSub').value, chap = g('mChap').value, lec = g('mLec').value;
+  if (!(sub && chap && lec)) return showIsland('Select Sub, Chap & Lec', 'error');
+  const v = g('manualTime').value.trim(); const man = !v ? 0 : parseInt(v, 10);
+  const payload = { id: newId(), date: new Date().toLocaleDateString('en-GB'), sub, chap, lec, diff: state.diff, time: man > 0 ? man : Math.round(state.elapsed / 60), notes: g('notes').value.trim() };
+  const logs = jget(HISTORY_KEY, []); logs.unshift(payload); jset(HISTORY_KEY, logs);
+  
+  state.run = false; clearInterval(tick); state.elapsed = 0; state.start = 0;
+  g('startBtn').innerHTML = '<i class="lni lni-play"></i> Start Flow'; g('startBtn').className = 'btn bm'; g('clockState').textContent = 'Ready';
+  g('saveCard').style.display = 'none'; g('mSub').value = ''; g('mChap').value = ''; g('mLec').value = '';
+  g('notes').value = ''; g('manualTime').value = ''; g('manualTimeDiv').style.display = 'none'; paintT();
+  showIsland('Saved to History'); go('history');
+}
+
+const CSV_KEY = 'ru_csv_ids';
+let selMode = false, selIds = new Set(), openId = null;
+let lpTimer = null, lpFired = false, lpX = 0, lpY = 0;
+
+function newId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function getLogs() {
+  const logs = jget(HISTORY_KEY, []); let ch = false;
+  logs.forEach(l => { if (!l.id) { l.id = newId(); ch = true; } });
+  if (ch) jset(HISTORY_KEY, logs);
+  return logs;
+}
+
+function notePrev(n) {
+  if (!n) return '<span style="color:var(--muted)">—</span>';
+  const one = String(n).split('\n')[0];
+  return esc(one.length > 16 ? one.slice(0, 16) + '…' : one);
+}
+
+function renderHistory() {
+  const logs = getLogs(); const tbody = g('tblLocalLogs');
+  if (!tbody) return;
+  if (g('histBar')) g('histBar').classList.toggle('on', selMode);
+  if (g('histCard')) g('histCard').classList.toggle('sel-mode', selMode);
+  if (g('histHint')) g('histHint').style.display = (!selMode && logs.length) ? 'block' : 'none';
+  if (g('selCount')) g('selCount').textContent = selIds.size + ' चुने';
+  if (g('selDelBtn')) g('selDelBtn').classList.toggle('dis', selIds.size > 1 && !allDownloaded());
+  if (!logs.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted)">No history found.</td></tr>'; return; }
+  tbody.innerHTML = logs.map(l => {
+    const sel = selIds.has(l.id);
+    let h = `<tr data-id="${l.id}" class="${sel ? 'sel' : ''}"><td class="ckc"><span class="ckb"></span></td><td>${esc(l.date)}</td><td>${esc(l.sub)}</td><td>${esc(l.chap)}</td><td>${esc(l.lec)}</td><td style="color:var(--primary);font-weight:bold">${esc(l.time)}m</td><td>${esc(l.diff)}</td><td>${notePrev(l.notes)}</td></tr>`;
+    if (!selMode && openId === l.id) h += `<tr class="detail"><td colspan="7">${l.notes ? esc(l.notes).replace(/\n/g, '<br>') : 'कोई notes नहीं'}</td></tr>`;
+    return h;
+  }).join('');
+}
+
+function initHistEvents() {
+  const tb = g('tblLocalLogs');
+  if (!tb) return;
+  tb.addEventListener('pointerdown', e => {
+    const tr = e.target.closest('tr[data-id]'); lpFired = false; if (!tr) return;
+    lpX = e.clientX; lpY = e.clientY; clearTimeout(lpTimer);
+    lpTimer = setTimeout(() => { lpFired = true; try { if (navigator.vibrate) navigator.vibrate(30); } catch(_) {} enterSel(tr.dataset.id); }, 500);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => tb.addEventListener(ev, () => clearTimeout(lpTimer)));
+  tb.addEventListener('pointermove', e => { if (Math.abs(e.clientX - lpX) > 10 || Math.abs(e.clientY - lpY) > 10) clearTimeout(lpTimer); });
+  tb.addEventListener('contextmenu', e => e.preventDefault());
+  tb.addEventListener('click', e => {
+    if (lpFired) { lpFired = false; return; }
+    const tr = e.target.closest('tr'); if (!tr) return;
+    if (tr.classList.contains('detail')) { openId = null; renderHistory(); return; }
+    const id = tr.dataset.id; if (!id) return;
+    if (selMode) toggleSel(id); else { openId = (openId === id) ? null : id; renderHistory(); }
+  });
+}
+
+function enterSel(id) { selMode = true; selIds = new Set([id]); openId = null; renderHistory(); }
+function exitSel() { selMode = false; selIds.clear(); renderHistory(); }
+function toggleSel(id) { if (selIds.has(id)) selIds.delete(id); else selIds.add(id); if (!selIds.size) { exitSel(); return; } renderHistory(); }
+function selectAllHist() {
+  const logs = getLogs();
+  if (selIds.size === logs.length) { exitSel(); return; }
+  selIds = new Set(logs.map(l => l.id)); renderHistory();
+}
+
+function allDownloaded() { const done = new Set(jget(CSV_KEY, [])); return [...selIds].every(id => done.has(id)); }
+
+function deleteSelected() {
+  const n = selIds.size;
+  if (!n) return showIsland('कुछ चुनें', 'error');
+  if (n > 1 && !allDownloaded()) return showIsland('पहले ऊपर CSV दबाकर Download करें', 'error');
+  const msg = n === 1 ? 'यह 1 record हटाएँ?' : n + ' records हटाएँ? (इनकी CSV आप Download कर चुके हैं)';
+  askConfirm(msg, () => {
+    jset(HISTORY_KEY, getLogs().filter(l => !selIds.has(l.id)));
+    selMode = false; selIds.clear(); renderHistory();
+    showIsland(n === 1 ? 'Record हटा दिया' : n + ' Records हटा दिए');
+  });
+}
+
+function csvCell(v, isText) {
+  let s = String(v == null ? '' : v);
+  if (isText && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+function isoDate(d) { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(d || ''); return m ? m[3] + '-' + p2(m[2]) + '-' + p2(m[1]) : (d || ''); }
+function buildCSV(logs) {
+  const head = ['तारीख', 'Subject', 'Chapter', 'Lecture', 'समय (मिनट)', 'Difficulty', 'Notes'].map(h => csvCell(h)).join(',');
+  const rows = logs.slice().reverse().map(l => [csvCell(isoDate(l.date)), csvCell(l.sub, true), csvCell(l.chap, true), csvCell(l.lec, true), csvCell(l.time), csvCell(l.diff), csvCell(l.notes, true)].join(','));
+  return '\uFEFF' + [head].concat(rows).join('\r\n');
+}
+function downloadCSV() {
+  const logs = getLogs();
+  if (!logs.length) return showIsland('कोई record नहीं है', 'error');
+  const blob = new Blob([buildCSV(logs)], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'Study_History_' + new Date().toLocaleDateString('en-GB').replace(/\//g, '-') + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  jset(CSV_KEY, logs.map(l => l.id));
+  renderHistory(); showIsland('CSV Download हुई (' + logs.length + ' records)');
+}
+</script>
+</body>
+</html>
